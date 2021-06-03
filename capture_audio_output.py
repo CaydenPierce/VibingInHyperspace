@@ -14,6 +14,7 @@ import pyaudio
 import wave
 import time
 import numpy as np
+import sys
 
 class AudioOut:
     def __init__(self, buf_size_seconds=3):
@@ -47,11 +48,24 @@ class AudioOut:
         if callback is None:
             callback = self.record_chunk_callback_default
 
+        #Select JACK system output as device
+        port_num = None
+        for i in range(0, self.p.get_device_count()):
+            info = self.p.get_device_info_by_index(i)
+            if (info["name"] == "system"):
+                if (self.p.get_host_api_info_by_index(info["hostApi"])["name"] == "JACK Audio Connection Kit"):
+                    port_num = i
+                    break
+        if port_num is None:
+            print("JACK not properly configured. See INSTALL section in README. Exiting.")
+            sys.exit()
+
         self.stream = self.p.open(format=self.FORMAT,
                         channels=self.CHANNELS,
                         rate=self.RATE,
                         input=True,
                         frames_per_buffer=self.CHUNK, 
+                        input_device_index=8,
                         stream_callback=callback)
 
     def start_audio(self):
@@ -98,7 +112,7 @@ def main():
     audio_out_obj.setup_audio()
     audio_out_obj.start_audio()
     while audio_out_obj.is_active():
-        time.sleep(10)
+        time.sleep(13)
         audio_out_obj.stop_audio()
     audio_out_obj.save_audio()
     audio_out_obj.kill()

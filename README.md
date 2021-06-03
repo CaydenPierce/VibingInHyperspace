@@ -23,6 +23,7 @@ To get MIDI devices to work in DAW and to record output with PyAudio at the same
 3. Configure JACK to use low latency - https://jackaudio.org/faq/linux_rt_config.html
 4. Configure pulseaudio to send audio through JACK by running `qjackctl` -> Settings -> 'Execute on startup' -> Paste the line `pacmd set-default-sink jack_out; a2jmidid -e &`
 5. Setup pulseaudio to use the JACK sink as the input device (so we can record our computer outpuit). Run `pavucontrol` -> Input Devices -> Uncheck the default and check 'Monitor of JACK sink'
+6. Start JACK -> `qjackctl` -> Start
 
 ## Run 
 
