@@ -1,0 +1,10 @@
+*.bmp
+*.mp4
+*.npy
+*.png
+*.prproj
+*.pyc
+__pycache__
+venv/
+
+frag_gen.glsl
