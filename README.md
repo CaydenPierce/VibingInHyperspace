@@ -7,3 +7,25 @@ This repo is a vision of a musical expression environement where music becomes a
 ## Technical Description  
 
 Live modulating virtual reality 3D hyperdimensional fractals with multiple streams of audio and brain wave data.
+
+## Install
+
+This runs in Ubuntu 20 with Python 3.8.
+
+```
+pip3 install -r requirements.txt
+```
+
+To get MIDI devices to work in DAW and to record output with PyAudio at the same time, some setup is required.
+
+1. Install linux low latency kernel
+2. Install JACK - `sudo apt-get install jackd2 qjackctl`
+3. Configure JACK to use low latency - https://jackaudio.org/faq/linux_rt_config.html
+4. Configure pulseaudio to send audio through JACK by running `qjackctl` -> Settings -> 'Execute on startup' -> Paste the line `pacmd set-default-sink jack_out; a2jmidid -e &`
+5. Setup pulseaudio to use the JACK sink as the input device (so we can record our computer outpuit). Run `pavucontrol` -> Input Devices -> Uncheck the default and check 'Monitor of JACK sink'
+
+## Run 
+
+```
+python3 main.py
+```
