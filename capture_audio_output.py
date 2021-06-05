@@ -1,20 +1,13 @@
 """
-Monitor a loopback monitor so we get a signal which is the computer's audio output.
-
-This code based on : https://stackoverflow.com/questions/26573556/record-speakers-output-with-pyaudio
-
-Must first set things up by running:
-`pacmd load-module module-loopback latency_msec=5`
-Then go to `pavucontrol`, input devices, uncheck default and check the monitor of the default.
-That's it. More detailed instructions available in the SO link above
+Select an audio device (JACK system) and record it in callback mode using PyAudio
 """
-
 
 import pyaudio
 import wave
 import time
 import numpy as np
 import sys
+import struct
 
 class AudioOut:
     def __init__(self, buf_size_seconds=3):
@@ -33,6 +26,9 @@ class AudioOut:
         self.p = None
         self.stream = None
 
+        #user optional callback on new chunk
+        self.user_callback = None
+
     def slide_buf(self, arr, data):
         """
         arr - byte array
@@ -45,8 +41,8 @@ class AudioOut:
     def setup_audio(self, callback=None):
         self.p = pyaudio.PyAudio()
 
-        if callback is None:
-            callback = self.record_chunk_callback_default
+        if callback is not None:
+            self.user_callback = callback
 
         #Select JACK system output as device
         port_num = None
@@ -57,7 +53,7 @@ class AudioOut:
                     port_num = i
                     break
         if port_num is None:
-            print("JACK not properly configured. See INSTALL section in README. Exiting.")
+            print("\n\nJACK not properly configured. See INSTALL section in README. Exiting.")
             sys.exit()
 
         self.stream = self.p.open(format=self.FORMAT,
@@ -66,7 +62,7 @@ class AudioOut:
                         input=True,
                         frames_per_buffer=self.CHUNK, 
                         input_device_index=8,
-                        stream_callback=callback)
+                        stream_callback=self.record_chunk_callback_default)
 
     def start_audio(self):
         self.stream.start_stream()
@@ -96,6 +92,11 @@ class AudioOut:
 
     def record_chunk_callback_default(self, in_data, frame_count, time_info, status):
         self.buf_frames = self.slide_buf(self.buf_frames, in_data)
+
+        #pass data to the creator of this class, if they want it
+        if self.user_callback is not None:
+            self.user_callback(self.parse_data_to_numpy(self.buf_frames))
+
         return (in_data, pyaudio.paContinue)
 
     def is_active(self):
@@ -106,6 +107,11 @@ class AudioOut:
 
     def get_data_frames(self):
         return self.buf_frames
+
+    def parse_data_to_numpy(self, data):
+        int_data = struct.unpack_from("<{}h".format(self.CHUNK), data)
+        int_data = np.asarray(int_data)
+        return int_data
 
 def main():
     audio_out_obj = AudioOut()
