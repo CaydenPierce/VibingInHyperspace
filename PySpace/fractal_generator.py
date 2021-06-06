@@ -239,7 +239,7 @@ class FractalGen:
         #======================================================
         #               Change the fractal here
         #======================================================
-        obj_render = self.tree_planet_cust()
+        self.obj_render = self.tree_planet_cust()
         #======================================================
 
         #======================================================
@@ -251,8 +251,8 @@ class FractalGen:
         self.camera['AMBIENT_OCCLUSION_STRENGTH'] = 0.01
         #======================================================
 
-        self.shader = Shader(obj_render)
-        self.program = shader.compile(camera)
+        self.shader = Shader(self.obj_render)
+        self.program = self.shader.compile(self.camera)
         print("Compiled!")
 
         self.matID = glGetUniformLocation(self.program, "iMat")
@@ -261,7 +261,7 @@ class FractalGen:
         self.ipdID = glGetUniformLocation(self.program, "iIPD")
 
         glUseProgram(self.program)
-        glUniform2fv(self.resID, 1, win_size)
+        glUniform2fv(self.resID, 1, self.win_size)
         glUniform1f(self.ipdID, 0.04)
 
         fullscreen_quad = np.array([-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0], dtype=np.float32)
@@ -269,15 +269,15 @@ class FractalGen:
         glEnableVertexAttribArray(0)
 
         self.mat = np.identity(4, np.float32)
-        self.mat[3,:3] = np.array(start_pos)
-        self.prevMat = np.copy(mat)
-        for i in range(len(keyvars)):
-            self.shader.set(str(i), keyvars[i])
+        self.mat[3,:3] = np.array(self.start_pos)
+        self.prevMat = np.copy(self.mat)
+        for i in range(len(self.keyvars)):
+            self.shader.set(str(i), self.keyvars[i])
 
         self.frame_num = 0
-        clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
 
-    def gen_fractal_frame():
+    def gen_fractal_frame(self):
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                         sys.exit(0)
@@ -287,10 +287,10 @@ class FractalGen:
                         elif event.key == pygame.K_ESCAPE:
                                 sys.exit(0)
 
-        self.mat[3,:3] += self.vel * (clock.get_time() / 1000)
+        self.mat[3,:3] += self.vel * (self.clock.get_time() / 1000)
 
-        if auto_velocity:
-                de = obj_render.DE(mat[3]) * auto_multiplier
+        if self.auto_velocity:
+                de = self.obj_render.DE(self.mat[3]) * self.auto_multiplier
                 if not np.isfinite(de):
                         de = 0.0
         else:
@@ -315,12 +315,12 @@ class FractalGen:
         if all_keys[pygame.K_KP9]:      self.keyvars[5] += rate; print(self.keyvars)
         if all_keys[pygame.K_KP6]:      self.keyvars[5] -= rate; print(self.keyvars)
 
-        self.prev_mouse_pos = mouse_pos
+        self.prev_mouse_pos = self.mouse_pos
         self.mouse_pos = pygame.mouse.get_pos()
         dx,dy = 0,0
-        if prev_mouse_pos is not None:
+        if self.prev_mouse_pos is not None:
                 self.center_mouse()
-                time_rate = (clock.get_time() / 1000.0) / (1 / self.max_fps)
+                time_rate = (self.clock.get_time() / 1000.0) / (1 / self.max_fps)
                 dx = (self.mouse_pos[0] - self.screen_center[0]) * time_rate
                 dy = (self.mouse_pos[1] - self.screen_center[1]) * time_rate
 
@@ -330,16 +330,16 @@ class FractalGen:
                         self.look_y += dy * self.look_speed
                         self.look_y = min(max(look_y, -math.pi/2), math.pi/2)
 
-                        rx = make_rot(self.look_x, 1)
-                        ry = make_rot(self.look_y, 0)
+                        rx = self.make_rot(self.look_x, 1)
+                        ry = self.make_rot(self.look_y, 0)
 
                         self.mat[:3,:3] = np.dot(ry, rx)
                 else:
-                        rx = make_rot(dx * self.look_speed, 1)
-                        ry = make_rot(dy * self.look_speed, 0)
+                        rx = self.make_rot(dx * self.look_speed, 1)
+                        ry = self.make_rot(dy * self.look_speed, 0)
 
                         self.mat[:3,:3] = np.dot(ry, np.dot(rx, self.mat[:3,:3]))
-                        self.mat[:3,:3] = reorthogonalize(self.mat[:3,:3])
+                        self.mat[:3,:3] = self.reorthogonalize(self.mat[:3,:3])
 
         acc = np.zeros((3,), dtype=np.float32)
         if all_keys[pygame.K_a]:
@@ -352,14 +352,14 @@ class FractalGen:
                 acc[2] += self.speed_accel / self.max_fps
 
         if np.dot(acc, acc) == 0.0:
-                vel *= self.speed_decel # TODO
+                self.vel *= self.speed_decel # TODO
         else:
-                vel += np.dot(self.mat[:3,:3].T, acc)
-                vel_ratio = min(self.max_velocity, de) / (np.linalg.norm(vel) + 1e-12)
+                self.vel += np.dot(self.mat[:3,:3].T, acc)
+                vel_ratio = min(self.max_velocity, de) / (np.linalg.norm(self.vel) + 1e-12)
                 if vel_ratio < 1.0:
-                        vel *= vel_ratio
+                        self.vel *= vel_ratio
         if all_keys[pygame.K_SPACE]:
-                vel *= 10.0
+                self.vel *= 10.0
 
         for i in range(3):
                 self.shader.set(str(i), self.keyvars[i])
@@ -373,9 +373,9 @@ class FractalGen:
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
         pygame.display.flip()
-        clock.tick(self.max_fps)
-        frame_num += 1
-        print("FPS (fractal0: {}".format(clock.get_fps()))
+        self.clock.tick(self.max_fps)
+        self.frame_num += 1
+        print("FPS (fractal0: {}".format(self.clock.get_fps()))
 
 if __name__ == "__main__":
     fractal_gen = FractalGen()
