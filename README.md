@@ -30,3 +30,7 @@ To get MIDI devices to work in DAW and to record output with PyAudio at the same
 ```
 python3 main.py
 ```
+
+## Credit
+
+PySpace: https://github.com/HackerPoet/PySpace - Thanks to HackerPoet for building the beautiful ray marching 3D fractal implementation that is driving the fractal generation.
