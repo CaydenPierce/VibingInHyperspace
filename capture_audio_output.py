@@ -61,7 +61,7 @@ class AudioOut:
                         rate=self.RATE,
                         input=True,
                         frames_per_buffer=self.CHUNK, 
-                        input_device_index=8,
+                        input_device_index=port_num,
                         stream_callback=self.record_chunk_callback_default)
 
     def start_audio(self):

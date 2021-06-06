@@ -2,18 +2,20 @@
 
 import pygame, sys, math, random, os
 import numpy as np
-import pyspace
+from . import pyspace
 
-from pyspace.coloring import *
-from pyspace.fold import *
-from pyspace.geo import *
-from pyspace.object import *
-from pyspace.shader import Shader
-from pyspace.camera import Camera
+from .pyspace.coloring import *
+from .pyspace.fold import *
+from .pyspace.geo import *
+from .pyspace.object import *
+from .pyspace.shader import Shader
+from .pyspace.camera import Camera
 
 from ctypes import *
 from OpenGL.GL import *
 from pygame.locals import *
+
+import time
 
 import os
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -24,7 +26,7 @@ class FractalGen:
         self.win_size = (1280, 720)
 
         #Maximum frames per second
-        self.max_fps = 30
+        self.max_fps = 60
 
         #Forces an 'up' orientation when True, free-camera when False
         self.gimbal_lock = False
@@ -48,7 +50,7 @@ class FractalGen:
         self.clicking = False
         self.mouse_pos = None
         self.screen_center = (self.win_size[0]/2, self.win_size[1]/2)
-        self.start_pos = [0, 0, 12.0]
+        self.start_pos = [0, 0, 13.0]
         self.vel = np.zeros((3,), dtype=np.float32)
         self.look_x = 0.0
         self.look_y = 0.0
@@ -189,7 +191,7 @@ class FractalGen:
                     obj.add(FoldMenger())
                     obj.add(OrbitMinAbs((0.24,2.28,7.6)))
                     obj.add(FoldScaleTranslate('1', (-2,-4.8,0)))
-                    obj.add(FoldPlane((0,0,-1), 0))
+                    obj.add(FoldPlane(('2',0,-1), 0))
             obj.add(Box(4.8, color='orbit'))
             return obj
 
@@ -276,6 +278,12 @@ class FractalGen:
 
         self.frame_num = 0
         self.clock = pygame.time.Clock()
+
+    def set_parameters(self, data):
+        for i, val in enumerate(data):
+            if val is not None:
+                print(val)
+                self.keyvars[i] = val
 
     def gen_fractal_frame(self):
         for event in pygame.event.get():
@@ -375,10 +383,10 @@ class FractalGen:
         pygame.display.flip()
         self.clock.tick(self.max_fps)
         self.frame_num += 1
-        print("FPS (fractal0: {}".format(self.clock.get_fps()))
 
 if __name__ == "__main__":
     fractal_gen = FractalGen()
     fractal_gen.fractal_setup()
     while True:
         fractal_gen.gen_fractal_frame()
+        time.sleep(0.2)
