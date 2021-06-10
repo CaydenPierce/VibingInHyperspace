@@ -23,10 +23,10 @@ os.environ['SDL_VIDEO_CENTERED'] = '1'
 class FractalGen:
     def __init__(self):
         #Size of the window and rendering
-        self.win_size = (1280, 720)
+        self.win_size = (1920, 1080)
 
         #Maximum frames per second
-        self.max_fps = 60
+        self.max_fps = 90
 
         #Forces an 'up' orientation when True, free-camera when False
         self.gimbal_lock = False
@@ -50,7 +50,7 @@ class FractalGen:
         self.clicking = False
         self.mouse_pos = None
         self.screen_center = (self.win_size[0]/2, self.win_size[1]/2)
-        self.start_pos = [0, 0, 13.0]
+        self.start_pos = [0, 0, 16.0]
         self.vel = np.zeros((3,), dtype=np.float32)
         self.look_x = 0.0
         self.look_y = 0.0
@@ -235,6 +235,7 @@ class FractalGen:
     def fractal_setup(self):
         pygame.init()
         window = pygame.display.set_mode(self.win_size, OPENGL | DOUBLEBUF)
+        #pygame.display.set_mode((0,0), pygame.OPENGL | pygame.FULLSCREEN)
         pygame.mouse.set_visible(False)
         self.center_mouse()
 
