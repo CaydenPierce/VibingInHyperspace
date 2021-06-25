@@ -232,7 +232,7 @@ class FractalGen:
             if pygame.key.get_focused():
                     pygame.mouse.set_pos(self.screen_center)
 
-    def fractal_setup(self):
+    def fractal_setup(self, fractal_func_obj):
         pygame.init()
         window = pygame.display.set_mode(self.win_size, OPENGL | DOUBLEBUF)
         #pygame.display.set_mode((0,0), pygame.OPENGL | pygame.FULLSCREEN)
@@ -242,7 +242,7 @@ class FractalGen:
         #======================================================
         #               Change the fractal here
         #======================================================
-        self.obj_render = self.tree_planet_cust()
+        self.obj_render = fractal_func_obj
         #======================================================
 
         #======================================================
@@ -283,7 +283,6 @@ class FractalGen:
     def set_parameters(self, data):
         for i, val in enumerate(data):
             if val is not None:
-                print(val)
                 self.keyvars[i] = val
 
     def gen_fractal_frame(self):

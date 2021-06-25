@@ -13,6 +13,7 @@ Live modulating virtual reality 3D hyperdimensional fractals with multiple strea
 This runs in Ubuntu 20 with Python 3.8.
 
 ```
+sudo apt install portaudio19-dev python3-pyaudio
 pip3 install -r requirements.txt
 ```
 
@@ -34,3 +35,15 @@ python3 main.py
 ## Credit
 
 PySpace: https://github.com/HackerPoet/PySpace - Thanks to HackerPoet for building the beautiful ray marching 3D fractal implementation that is driving the fractal generation.
+
+## TODO
+
+What works now:
+- receive input from all sinks and sources in JACK and pulseaudio, including MIDI devices
+- generate a 3d fractal using PySpace
+- modulate the fractal with simple metrics from the music like RMS, bass freq range power, hi hat freq range power
+
+What we need:
+- signal processing pipeline that holds a rolling window of the last n seconds of the song, constantly recomputes metrics on that (fundamental frequency, RMS, bass freq power, hi hat freq power, etc) and their respective maximums and minimums over the last n seconds, and 
+- "art" classes - need to abstract a fractals definition (i.e. it's pyspace function, number of available editable variables/parameters, and the range of the values that each parameters can take on 
+- connect BCI to also visualize the audience/musician's RESPONSE to the music
